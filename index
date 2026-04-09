@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#ff3366">
+    <title>❤️ 予你 · 心动信箱 ❤️</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(145deg, #ff9a9e 0%, #fad0c4 50%, #fad0c4 100%);
+            background-attachment: fixed;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'PingFang SC', Roboto, 'Helvetica Neue', sans-serif;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+            cursor: pointer;
+        }
+
+        /* 主卡片 —— 像一封信 */
+        .card {
+            max-width: 500px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(10px);
+            border-radius: 64px 48px 80px 48px;
+            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.5);
+            overflow: hidden;
+            padding: 40px 28px 50px;
+            text-align: center;
+            transition: all 0.3s ease;
+            animation: floatIn 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            z-index: 20;
+        }
+
+        /* 跳动爱心区域 */
+        .heart-area {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .heart-beat {
+            width: 110px;
+            height: 110px;
+            margin: 0 auto;
+            animation: heartbeat 1.2s infinite ease-in-out;
+            filter: drop-shadow(0 8px 18px rgba(255, 51, 102, 0.4));
+        }
+
+        .heart-beat svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* 动态光泽 */
+        .glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 140px;
+            height: 140px;
+            background: radial-gradient(circle, rgba(255,80,120,0.4) 0%, rgba(255,80,120,0) 70%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: pulseGlow 2s infinite;
+            pointer-events: none;
+        }
+
+        /* 标题 + 浪漫文案 */
+        .title {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff3366, #ff6699);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin: 15px 0 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .poem {
+            font-size: 1rem;
+            color: #b14a5c;
+            background: rgba(255, 245, 245, 0.7);
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 60px;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+
+        .message-box {
+            background: #fff9f7;
+            border-radius: 42px;
+            padding: 20px 18px;
+            margin: 24px 0;
+            text-align: left;
+            border: 1px solid #ffe2e0;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.02);
+        }
+
+        .message-box p {
+            font-size: 1rem;
+            line-height: 1.55;
+            color: #4a2a33;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .message-box span {
+            font-size: 1.3rem;
+        }
+
+        /* 计数按钮 / 惊喜 */
+        .surprise-btn {
+            background: linear-gradient(95deg, #ff7a7a, #ff5068);
+            border: none;
+            padding: 14px 20px;
+            border-radius: 50px;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 6px 14px rgba(255, 80, 100, 0.4);
+            margin-top: 8px;
+        }
+
+        .surprise-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* 底部footer */
+        .footer-note {
+            margin-top: 32px;
+            font-size: 0.75rem;
+            color: #c06d7a;
+            border-top: 1px dashed #ffcdc5;
+            padding-top: 20px;
+        }
+
+        /* 漂浮粒子爱心 (canvas动态) */
+        #loveCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* 手机优化 */
+        @media (max-width: 550px) {
+            .card {
+                padding: 30px 20px 40px;
+            }
+            .heart-beat {
+                width: 80px;
+                height: 80px;
+            }
+            .title {
+                font-size: 1.7rem;
+            }
+        }
+
+        /* 动画 */
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.12); }
+        }
+
+        @keyframes pulseGlow {
+            0% { opacity: 0.3; transform: translate(-50%, -50%) scale(0.8);}
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1.4);}
+        }
+
+        @keyframes floatIn {
+            0% {
+                opacity: 0;
+                transform: translateY(40px) scale(0.96);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 画布背景特效 (粒子爱心) -->
+    <canvas id="loveCanvas"></canvas>
+
+    <div class="card">
+        <div class="heart-area">
+            <div class="heart-beat">
+                <svg viewBox="0 0 100 100">
+                    <path fill="#ff3366" d="M50,88.5 C50,88.5 15,60 15,35 C15,20 25,10 35,10 C45,10 50,18 50,25 C50,18 55,10 65,10 C75,10 85,20 85,35 C85,60 50,88.5 50,88.5Z">
+                        <animate attributeName="fill" values="#ff3366;#ff5e7e;#ff3366" dur="1.8s" repeatCount="indefinite"/>
+                    </path>
+                </svg>
+            </div>
+            <div class="glow"></div>
+        </div>
+
+        <div class="title">
+            🌸 给最特别的你 🌸
+        </div>
+        <div class="poem">
+            ✨ 心跳会说话 · 爱意不隐藏 ✨
+        </div>
+
+        <div class="message-box">
+            <p><span>💌</span> 我计算过星河，也写过春风，</p>
+            <p><span>🎈</span> 却都不及你眼里的那抹温柔。</p>
+            <p><span>🌟</span> 想和你一起看所有浪漫的日落，</p>
+            <p><span>❤️</span> 如果你在，每一天都是情书。</p>
+        </div>
+
+        <button class="surprise-btn" id="surpriseBtn">
+            ✨ 戳一下 · 藏了心动 ✨
+        </button>
+        <div class="footer-note">
+            💖 点击任意地方 · 爱心会飞向你 💖
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ---------- 爱心粒子系统（经典浪漫感）-----------
+            const canvas = document.getElementById('loveCanvas');
+            let ctx = canvas.getContext('2d');
+            let width = window.innerWidth;
+            let height = window.innerHeight;
+            let particles = [];
+            let frame = 0;
+            let resizeTimeout;
+
+            function resizeCanvas() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+            }
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    resizeCanvas();
+                }, 100);
+            });
+            resizeCanvas();
+
+            // 爱心粒子类
+            class HeartParticle {
+                constructor(x, y, size, speedX, speedY, opacity, color) {
+                    this.x = x;
+                    this.y = y;
+                    this.size = size;
+                    this.speedX = speedX;
+                    this.speedY = speedY;
+                    this.opacity = opacity;
+                    this.color = color;
+                    this.gravity = 0.08;
+                    this.life = 1;
+                }
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    this.speedY += this.gravity;
+                    this.life -= 0.008;
+                    this.opacity = this.life * 0.7;
+                    return this.life <= 0.02 || this.y > height + 100;
+                }
+                draw(ctx) {
+                    ctx.save();
+                    ctx.shadowBlur = 0;
+                    ctx.font = `${this.size}px "Segoe UI Emoji", "Apple Color Emoji"`;
+                    ctx.globalAlpha = this.opacity;
+                    ctx.fillStyle = this.color;
+                    ctx.fillText("❤️", this.x, this.y);
+                    ctx.restore();
+                }
+            }
+
+            function addHeartBurst(x, y, count = 12) {
+                for (let i = 0; i < count; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = Math.random() * 2.5 + 1;
+                    const vx = Math.cos(angle) * speed * (Math.random() * 1.2);
+                    const vy = Math.sin(angle) * speed * (Math.random() * 1.2) - 2;
+                    const size = Math.random() * 20 + 16;
+                    const colors = ["#ff4d6d", "#ff758f", "#ff8fa3", "#ffb3c6"];
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    particles.push(new HeartParticle(x, y, size, vx, vy, 0.9, color));
+                }
+            }
+
+            function addRandomHeart() {
+                const x = Math.random() * width;
+                const y = height - 20;
+                const size = Math.random() * 20 + 18;
+                const vx = (Math.random() - 0.5) * 1.2;
+                const vy = - (Math.random() * 2 + 1.5);
+                particles.push(new HeartParticle(x, y, size, vx, vy, 0.7, "#ff5e7e"));
+            }
+
+            function animateParticles() {
+                if (!ctx) return;
+                ctx.clearRect(0, 0, width, height);
+                for (let i = particles.length-1; i >= 0; i--) {
+                    const isDead = particles[i].update();
+                    if (isDead) {
+                        particles.splice(i,1);
+                        continue;
+                    }
+                    particles[i].draw(ctx);
+                }
+                // 每20帧生成一个飘浮爱心
+                if (frame % 18 === 0) addRandomHeart();
+                frame++;
+                requestAnimationFrame(animateParticles);
+            }
+            animateParticles();
+
+            // 全局点击效果 ( 卡片区域 + canvas区域都触发 )
+            function onGlobalClick(e) {
+                let clientX, clientY;
+                if (e.touches) {
+                    clientX = e.touches[0].clientX;
+                    clientY = e.touches[0].clientY;
+                } else {
+                    clientX = e.clientX;
+                    clientY = e.clientY;
+                }
+                if (clientX && clientY) {
+                    addHeartBurst(clientX, clientY, 18);
+                } else {
+                    addHeartBurst(width/2, height/2, 20);
+                }
+                // 额外加一句小反馈（不干扰视觉）
+                const btn = document.getElementById('surpriseBtn');
+                if (btn) {
+                    btn.style.transform = 'scale(0.98)';
+                    setTimeout(() => { btn.style.transform = ''; }, 120);
+                }
+            }
+
+            document.body.addEventListener('click', onGlobalClick);
+            document.body.addEventListener('touchstart', onGlobalClick);
+
+            // 独立按钮事件：显示文字弹窗 + 加强爱心
+            const surprise = document.getElementById('surpriseBtn');
+            if (surprise) {
+                surprise.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    // 额外爱心大爆炸
+                    const rect = surprise.getBoundingClientRect();
+                    const centerX = rect.left + rect.width/2;
+                    const centerY = rect.top + rect.height/2;
+                    addHeartBurst(centerX, centerY, 35);
+                    // 温柔alert风格（用仿弹窗）
+                    let modal = document.createElement('div');
+                    modal.innerText = '❤️ 悄悄告诉你：你是我最心动的例外 ❤️';
+                    modal.style.position = 'fixed';
+                    modal.style.bottom = '25%';
+                    modal.style.left = '50%';
+                    modal.style.transform = 'translateX(-50%)';
+                    modal.style.background = '#fff0f2';
+                    modal.style.color = '#b13e55';
+                    modal.style.padding = '14px 24px';
+                    modal.style.borderRadius = '60px';
+                    modal.style.fontWeight = 'bold';
+                    modal.style.boxShadow = '0 8px 24px rgba(0,0,0,0.2)';
+                    modal.style.zIndex = '999';
+                    modal.style.fontSize = '1rem';
+                    modal.style.backdropFilter = 'blur(4px)';
+                    modal.style.border = '1px solid #ffbbc5';
+                    document.body.appendChild(modal);
+                    setTimeout(() => {
+                        modal.style.opacity = '0';
+                        setTimeout(() => modal.remove(), 400);
+                    }, 2000);
+                });
+            }
+
+            // 主动生成一点启动爱心
+            setTimeout(() => {
+                addHeartBurst(width/2, height/2, 12);
+                for(let i=0;i<4;i++) {
+                    setTimeout(() => addRandomHeart(), i*200);
+                }
+            }, 300);
+        })();
+    </script>
+</body>
+</html>
